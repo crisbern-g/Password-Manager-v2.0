@@ -1,11 +1,15 @@
 import tkinter as tk
 from tkinter import ttk
-from typing import Text 
+import Account_Input
 import LoginScreen
+
+def add_account(master):
+    addAccount = Account_Input.Add_Account(master)
+    addAccount.mainloop()
 
 def main():
     main = tk.Tk()
-    tk.Label(main, text='Logged in As Test').grid(row=0, column=0, sticky=tk.W)
+    tk.Label(main, text='Logged in As '+ login_credentials['username']).grid(row=0, column=0, sticky=tk.W)
 
     passsword_table_pane = tk.PanedWindow(main)
     passsword_table_pane.grid(row=1, column=0)
@@ -26,7 +30,7 @@ def main():
     passwords_table.heading('Date Modified', text='Date Modified')
     passwords_table.grid(row=0, column=0)
 
-    addButton = tk.Button(actions_button_pane, text='Add Account', width=15, cursor='hand2')
+    addButton = tk.Button(actions_button_pane, text='Add Account', width=15, cursor='hand2', command=lambda: add_account(main))
     addButton.grid(row=0, column=0, pady=5)
 
     editButton = tk.Button(actions_button_pane, text='Edit Account', width=15, cursor='hand2')
@@ -37,12 +41,10 @@ def main():
 
     main.mainloop()
 
-# login = LoginScreen.Login_Signup()
-# login_credentials = login.get_credentials()
+login = LoginScreen.Login_Signup()
+login_credentials = login.get_credentials()
 
-# try:
-    
-# except KeyError:
-#     main.destroy()
-
-main()
+try:
+    main()
+except KeyError:
+    main.destroy()
