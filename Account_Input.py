@@ -4,8 +4,12 @@ import random
 from datetime import datetime
 
 class Add_Account(Toplevel):
-    def __init__(self, master, db_Connection, user_id, action):
+    def __init__(self, master, db_Connection, user_id, action, platform='', username='', password=''):
         Toplevel.__init__(self,master)
+
+        self.platform = platform
+        self.username = username
+        self.password = password
         self.action = action
         self.user_id = user_id
         self.db_connection = db_Connection
@@ -29,8 +33,9 @@ class Add_Account(Toplevel):
 
         #drop-down Menu
         self.platformType = StringVar() #variable for the menu
-        self.platformEntry = Entry(self,textvariable=self.platformType) #values of the drop down
-        self.platformEntry.config(width = 20,bg="aliceblue")
+        self.platformEntry = Entry(self,textvariable=self.platformType)
+        self.platformEntry.insert(0, self.platform)
+        self.platformEntry.config(width = 30,bg="aliceblue")
         self.platformEntry.place(x=200,y=20)
         self.platformEntry.bind('<Key>', self.validate)
         self.platformEntry.bind('<KeyRelease>', self.validate)
@@ -38,11 +43,14 @@ class Add_Account(Toplevel):
         #Entries
         self.usernameVar = StringVar()
         self.usernameEntry = Entry(self, textvariable=self.usernameVar,bg="aliceblue", width = 30)
+        self.usernameEntry.insert(0, self.username)
         self.usernameEntry.place(x=200, y=57)
         self.usernameEntry.bind('<Key>', self.validate)
         self.usernameEntry.bind('<KeyRelease>', self.validate)
+
         self.passwordVar = StringVar()
         self.passwordEntry = Entry(self, textvariable=self.passwordVar, width = 30, show='*',bg="aliceblue")
+        self.passwordEntry.insert(0, self.password)
         self.passwordEntry.bind('<Key>', self.validate)
         self.passwordEntry.bind('<KeyRelease>', self.validate)
         self.passwordEntry.place(x=200, y=92)

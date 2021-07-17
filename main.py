@@ -1,8 +1,11 @@
+from os import stat
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 import Account_Input
 import LoginScreen
 import dbConnection
+import Edit_Info
 
 dataBase_Connection = dbConnection.DbConnection()
 
@@ -14,10 +17,40 @@ def add_account():
     addAccount.mainloop()
 
 def update_table():
+    deleteButton.config(state='disabled')
+    editButton.config(state='disabled')
     accounts = dataBase_Connection.get_all_accounts(login_credentials['id'])
     passwords_table.delete(*passwords_table.get_children())
     for account in accounts:
         passwords_table.insert(parent='', index='end', iid=account[0], text='', values=(account[1], account[2], account[3], account[4], account[5]))
+
+def get_selected(*event):
+    selected = passwords_table.focus()
+    selected = passwords_table.item(selected)
+    
+    if selected != {}:
+        deleteButton.config(state='normal')
+        editButton.config(state='normal')
+    
+    data = {'id': passwords_table.focus(), 'data':selected['values']}
+    return data
+    
+
+def delete_account():
+    choice  = messagebox.askyesno(message='Are you sure you want to delete this account?', title='Confirmation')
+
+    if choice:
+        data = get_selected()
+        dataBase_Connection.delete_account(data['id'])
+        update_table()
+        deleteButton.config(state='disabled')
+        editButton.config(state='disabled')
+
+def edit_account():
+    data = get_selected()
+    edit = Edit_Info.Edit_Info(main, dataBase_Connection, login_credentials['id'], update_table, data['data'][0], data['data'][1], data['data'][2], data['id'])
+    edit.mainloop()
+    
 
 try:
     main = tk.Tk()
@@ -31,7 +64,7 @@ try:
     actions_button_pane = tk.PanedWindow(main)
     actions_button_pane.grid(row=1, column=1)
 
-    passwords_table = ttk.Treeview(passsword_table_pane)
+    passwords_table = ttk.Treeview(passsword_table_pane, selectmode='browse')
     passwords_table['columns'] = ('Platform', 'Username', 'Password', 'Date Added', 'Date Modified')
 
     passwords_table.column('#0', width=0, minwidth=0)
@@ -42,18 +75,19 @@ try:
     passwords_table.heading('Password', text='Password')
     passwords_table.heading('Date Added', text='Date Added')
     passwords_table.heading('Date Modified', text='Date Modified')
+    passwords_table.bind('<ButtonRelease-1>', get_selected)
     passwords_table.grid(row=0, column=0)
-
-    update_table()
 
     addButton = tk.Button(actions_button_pane, text='Add Account', width=15, cursor='hand2', command=add_account)
     addButton.grid(row=0, column=0, pady=5)
 
-    editButton = tk.Button(actions_button_pane, text='Edit Account', width=15, cursor='hand2')
+    editButton = tk.Button(actions_button_pane, text='Edit Account', width=15, cursor='hand2', state='disabled', command=edit_account)
     editButton.grid(row=1, column=0, pady=5)
 
-    deleteButton = tk.Button(actions_button_pane, text='Delete Account', width=15, cursor='hand2')
+    deleteButton = tk.Button(actions_button_pane, text='Delete Account', width=15, cursor='hand2', state='disabled', command=delete_account)
     deleteButton.grid(row=2, column=0, pady=5)
+
+    update_table()
 
     main.mainloop()
 except KeyError:

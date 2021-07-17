@@ -59,3 +59,31 @@ class DbConnection:
             accounts = accounts.fetchall()
 
             return accounts
+    
+    def delete_account(self, account_id):
+        with self.connection:
+            self.dbCUrsor.execute('DELETE FROM accounts WHERE id=:account_id', {'account_id':account_id})
+
+    def update_account(self, platform, username, password, date_modified, account_id):
+        new_data = {
+            'platform': platform,
+            'username': username,
+            'password': password,
+            'date_modified': date_modified,
+            'account_id': account_id
+        }
+
+        with self.connection:
+            self.dbCUrsor.execute(
+                '''
+                UPDATE accounts
+
+                SET platform = :platform,
+                username=:username,
+                password=:password,
+                date_modified = :date_modified
+
+                WHERE id=:account_id
+                ''',
+                new_data
+            )
