@@ -2,13 +2,27 @@ import tkinter as tk
 from tkinter import ttk
 import Account_Input
 import LoginScreen
+import dbConnection
 
-def add_account(master):
-    addAccount = Account_Input.Add_Account(master)
+dataBase_Connection = dbConnection.DbConnection()
+
+login = LoginScreen.Login_Signup(dataBase_Connection)
+login_credentials = login.get_credentials()
+
+def add_account():
+    addAccount = Account_Input.Add_Account(main, dataBase_Connection, login_credentials['id'], update_table)
     addAccount.mainloop()
 
-def main():
+def update_table():
+    accounts = dataBase_Connection.get_all_accounts(login_credentials['id'])
+    passwords_table.delete(*passwords_table.get_children())
+    for account in accounts:
+        passwords_table.insert(parent='', index='end', iid=account[0], text='', values=(account[1], account[2], account[3], account[4], account[5]))
+
+try:
     main = tk.Tk()
+    main.title('Password Manager 2.0')
+
     tk.Label(main, text='Logged in As '+ login_credentials['username']).grid(row=0, column=0, sticky=tk.W)
 
     passsword_table_pane = tk.PanedWindow(main)
@@ -30,7 +44,9 @@ def main():
     passwords_table.heading('Date Modified', text='Date Modified')
     passwords_table.grid(row=0, column=0)
 
-    addButton = tk.Button(actions_button_pane, text='Add Account', width=15, cursor='hand2', command=lambda: add_account(main))
+    update_table()
+
+    addButton = tk.Button(actions_button_pane, text='Add Account', width=15, cursor='hand2', command=add_account)
     addButton.grid(row=0, column=0, pady=5)
 
     editButton = tk.Button(actions_button_pane, text='Edit Account', width=15, cursor='hand2')
@@ -40,11 +56,5 @@ def main():
     deleteButton.grid(row=2, column=0, pady=5)
 
     main.mainloop()
-
-login = LoginScreen.Login_Signup()
-login_credentials = login.get_credentials()
-
-try:
-    main()
 except KeyError:
-    main.destroy()
+    pass

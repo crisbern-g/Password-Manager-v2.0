@@ -4,11 +4,11 @@ import dbConnection
 import sqlite3
 
 class Login_Signup:
-    def __init__(self):
+    def __init__(self, db_connection):
         self.login_credentials = {}
 
         self.visible_password = False
-        self.db_connection = dbConnection.DbConnection()
+        self.db_connection = db_connection
         #Frame
         self.loginFrame = Tk()
         self.loginFrame.title("Please Login")
