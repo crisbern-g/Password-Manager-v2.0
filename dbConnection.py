@@ -60,7 +60,7 @@ class DbConnection:
                 else:
                     return None
             except TypeError:
-                return user
+                return None
     
     def add_account(self, platform, username, password, date_added, date_modified, user_id):
         password = self.encrpytor_decryptor.encrypt(password.encode('UTF-8'))
@@ -137,3 +137,32 @@ class DbConnection:
 
             return accounts
 
+    def delete_user(self, user_id):
+        with self.connection:
+            self.dbCUrsor.execute(
+                '''
+                DELETE FROM accounts WHERE user_id=:user_id
+                ''',
+                {'user_id':user_id}
+            )
+
+            self.dbCUrsor.execute(
+                '''
+                DELETE FROM users WHERE id=:user_id
+                ''',
+                {'user_id':user_id}
+            )
+    
+    def update_user_password(self, user_id, password):
+        password = self.encrpytor_decryptor.encrypt(password.encode('UTF-8'))
+        password = password.decode('UTF-8')
+
+        with self.connection:
+            self.dbCUrsor.execute(
+                '''
+                UPDATE users
+                SET password = :password
+                WHERE id=:user_id
+                ''',
+                {'password':password, 'user_id':user_id}
+            )

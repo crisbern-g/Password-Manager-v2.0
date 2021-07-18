@@ -3,32 +3,34 @@ from tkinter import *
 import dbConnection
 import sqlite3
 
-class Login_Signup:
+class Login_Signup(Tk):
     def __init__(self, db_connection):
+        Tk.__init__(self)
+        
         self.login_credentials = {}
 
         self.visible_password = False
         self.db_connection = db_connection
+
         #Frame
-        self.loginFrame = Tk()
-        self.loginFrame.title("Please Login")
-        self.loginFrame.geometry("350x200")
-        self.loginFrame.resizable(False,False)
-        self.loginFrame.config(bg='LightSteelBlue')
+        self.title("Please Login")
+        self.geometry("350x200")
+        self.resizable(False,False)
+        self.config(bg='LightSteelBlue')
 
         #Label
-        Label(self.loginFrame,text="Username:",font="Roboto 11 bold",bg="LightSteelBlue").grid(row=0,column=0)
-        Label(self.loginFrame,text="Password  ",font="Roboto 11 bold",bg="LightSteelBlue").grid(row=1,column=0)
-        Label(self.loginFrame,text="No account?",font="Roboto 9",bg="LightSteelBlue").grid(row=5,column=0)
+        Label(self,text="Username:",font="Roboto 11 bold",bg="LightSteelBlue").grid(row=0,column=0)
+        Label(self,text="Password  ",font="Roboto 11 bold",bg="LightSteelBlue").grid(row=1,column=0)
+        Label(self,text="No account?",font="Roboto 9",bg="LightSteelBlue").grid(row=5,column=0)
 
         #StringVar
         self.entryUser = StringVar()
         self.entryPass = StringVar()
 
         #Entry
-        self.userEntry = Entry(self.loginFrame,textvariable=self.entryUser,width=30,bg="aliceblue")
+        self.userEntry = Entry(self,textvariable=self.entryUser,width=30,bg="aliceblue")
         self.userEntry.grid(row=0,column=1)
-        self.passEntry = Entry(self.loginFrame,textvariable=self.entryPass,show='*',width=30,bg="aliceblue")
+        self.passEntry = Entry(self,textvariable=self.entryPass,show='*',width=30,bg="aliceblue")
         self.passEntry.grid(row=1,column=1)
 
         #Binds
@@ -38,18 +40,16 @@ class Login_Signup:
         self.passEntry.bind('<KeyRelease>',self.validate)
 
         #Buttons
-        self.showPasswordBtn = Button(self.loginFrame,text="Show Password",width="15",font="Roboto 8",command=self.show_hide_password,bg="Azure")
+        self.showPasswordBtn = Button(self,text="Show Password",width="15",font="Roboto 8",command=self.show_hide_password,bg="Azure")
         self.showPasswordBtn.grid(row=3,column=1,padx=75,pady=10)
-        self.loginBtn = Button(self.loginFrame,text='Login',height="1",width="10",font="Roboto 9",state=DISABLED,command= self.login,bg='Azure')
+        self.loginBtn = Button(self,text='Login',height="1",width="10",font="Roboto 9",state=DISABLED,command= self.login,bg='Azure')
         self.loginBtn.grid(row=4,column=1,sticky=W,pady=10)
 
-        self.signUpBtn = Button(self.loginFrame,text='Sign Up',height="1",width="10",font="Roboto 9",command=self.register,bg="Azure")
+        self.signUpBtn = Button(self,text='Sign Up',height="1",width="10",font="Roboto 9",command=self.register,bg="Azure")
         self.signUpBtn.grid(row=5,column=1,sticky=W,pady=5)
 
-        Label(self.loginFrame, text = "PM", font="GIGI 13",bg="LightSteelBlue").place(x=260, y=150)
-        Label(self.loginFrame, text = "Password Manager", font = "Magneto 9",bg="LightSteelBlue").place(x=210, y=180)
-
-        self.loginFrame.mainloop()
+        Label(self, text = "PM", font="GIGI 13",bg="LightSteelBlue").place(x=260, y=150)
+        Label(self, text = "Password Manager", font = "Magneto 9",bg="LightSteelBlue").place(x=210, y=180)
 
     def login(self):
         account = {
@@ -61,9 +61,10 @@ class Login_Signup:
 
         if loginDetails != None:
             tkinter.messagebox.showinfo(title="Success", message="Login Successful!")
-            self.loginFrame.destroy()
+            self.destroy()
             self.login_credentials['id'] = loginDetails[0]
             self.login_credentials['username'] = loginDetails[1]
+            self.login_credentials['password'] = loginDetails[2]
         else:
             tkinter.messagebox.showerror(title="Wrong Username or  Password", message="You have entered the Wrong Username or Password.")
     
@@ -101,14 +102,14 @@ class Login_Signup:
                 self.db_connection.addUser(registerAccount['NewUsername'], registerAccount['NewPassword'])
                 tkinter.messagebox.showinfo(title="Congrats "+newUsername.get(),message="Registration Successful!")
                 registerScreen.withdraw()
-                self.loginFrame.deiconify()
+                self.deiconify()
             except sqlite3.IntegrityError:
                 tkinter.messagebox.showerror(title='Invalid Username', message='Username already exists')
 
         def on_closing():
             if tkinter.messagebox.askyesno("Close window?","Do you want to cancel the registration?"):
                 registerScreen.destroy()
-                self.loginFrame.deiconify()
+                self.deiconify()
 
         def validateRegBtn(event):
 
@@ -135,8 +136,8 @@ class Login_Signup:
                 self.visible_password = True
                 hideRegBtn.config(text='Hide Password')
 
-        self.loginFrame.grab_set()
-        registerScreen = Toplevel(self.loginFrame)
+        self.grab_set()
+        registerScreen = Toplevel(self)
         registerScreen.title("Sign Up")
         registerScreen.geometry("250x300")
         registerScreen.resizable(False, False)
@@ -181,7 +182,7 @@ class Login_Signup:
 
         registerBtn = Button(registerScreen, text="Register", height="1", width="10", font="Roboto 9 bold", state=DISABLED,command=registerBtn)
         registerBtn.pack()
-        self.loginFrame.withdraw()
+        self.withdraw()
         registerScreen.protocol("WM_DELETE_WINDOW",on_closing)
         registerScreen.mainloop()
 

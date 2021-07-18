@@ -13,6 +13,7 @@ class Add_Account(Toplevel):
         self.action = action
         self.user_id = user_id
         self.db_connection = db_Connection
+        self.grab_set()
 
         self.geometry("500x350")
         self.title("Add Account")
@@ -29,7 +30,7 @@ class Add_Account(Toplevel):
         Label(self, text = "Character count", font = "roboto 9",bg="lightsteelblue").place(x = 160, y = 260)
 
         Label(self, text = "PM", font = "Gigi 13",bg="lightsteelblue").place(x = 425, y = 300)
-        Label(self, text = "Password Manager", font = "Magneto 9",bg="lightsteelblue").place(x = 385, y = 320)
+        Label(self, text = "Password Manager", font = "Magneto 9",bg="lightsteelblue").place(x = 360, y = 320)
 
         #drop-down Menu
         self.platformType = StringVar() #variable for the menu

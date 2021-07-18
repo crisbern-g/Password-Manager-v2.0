@@ -7,10 +7,13 @@ import Account_Input
 import LoginScreen
 import dbConnection
 import Edit_Info
+import Manage_Account
 
 dataBase_Connection = dbConnection.DbConnection()
 
 login = LoginScreen.Login_Signup(dataBase_Connection)
+login.mainloop()
+
 login_credentials = login.get_credentials()
 
 def add_account():
@@ -59,7 +62,7 @@ def edit_account():
     edit = Edit_Info.Edit_Info(main, dataBase_Connection, login_credentials['id'], update_table, data['data'][0], data['data'][1], data['data'][2], data['id'])
     edit.mainloop()
 
-def search():
+def search(*event):
     secret_key = config('SECRET').encode('UTF-8')
     encrpytor_decryptor = Fernet(secret_key)
 
@@ -71,14 +74,36 @@ def search():
         decrypted_password = decrypted_password.decode('UTF-8')
         passwords_table.insert(parent='', index='end', iid=account[0], text='', values=(account[1], account[2], decrypted_password, account[4], account[5]))
 
+def log_out():
+    main.destroy()
+
+def manage_account():
+    manage = Manage_Account.Manage_Account(main, dataBase_Connection, login_credentials['id'], login_credentials['username'], login_credentials['password']) 
+    manage.mainloop()
+
+def show_about():
+    messagebox.showinfo(title='About', message='Password Manager 2.0 helps you store your passwords safely in your local storage.')
+
 try:
     main = tk.Tk()
     main.title('Password Manager 2.0')
+    main.configure(bg='lightsteelblue')
     main.resizable(0,0)
 
-    tk.Label(main, text='Logged in As '+ login_credentials['username']).grid(row=0, column=0, sticky=tk.W)
+    menuBar = tk.Menu(main, bg='lightsteelblue')
 
-    searchPane = tk.PanedWindow(main, height=900)
+    account_menu = tk.Menu(menuBar, tearoff=0)
+    account_menu.add_command(label='Account Settings', command=manage_account)
+    account_menu.add_command(label='Logout', command=log_out)
+
+    help_menu = tk.Menu(menuBar, tearoff=0)
+    help_menu.add_command(label='About', command=show_about)
+
+    #menuBar Cascades
+    menuBar.add_cascade(label='Logged in as: '+ login_credentials['username'], menu=account_menu)
+    menuBar.add_cascade(label='Help', menu=help_menu)
+
+    searchPane = tk.PanedWindow(main, height=900, bg='lightsteelblue')
     searchPane.grid(row=1, column=0)
 
     searchButton = tk.Button(searchPane,text='Search', width=20, command=search)
@@ -86,17 +111,27 @@ try:
 
     searchEntry = tk.Entry(searchPane, width=50)
     searchEntry.grid(row=0, column=1, sticky=tk.W)
+    searchEntry.bind('<Return>', search)
 
-    passsword_table_pane = tk.PanedWindow(main)
+    passsword_table_pane = tk.PanedWindow(main, bg='lightsteelblue')
     passsword_table_pane.grid(row=2, column=0)
 
-    actions_button_pane = tk.PanedWindow(main)
+    actions_button_pane = tk.PanedWindow(main, bg='lightsteelblue')
     actions_button_pane.grid(row=2, column=1)
+
+    #Configuring the Treeview
+    style=ttk.Style()
+    style.configure("Treeview.Heading", font=('Calibri', 13, 'bold'))
 
     passwords_table = ttk.Treeview(passsword_table_pane, selectmode='browse')
     passwords_table['columns'] = ('Platform', 'Username', 'Password', 'Date Added', 'Date Modified')
 
     passwords_table.column('#0', width=0, minwidth=0)
+    passwords_table.column('Platform', minwidth=150)
+    passwords_table.column('Username', minwidth=150)
+    passwords_table.column('Password', minwidth=150)
+    passwords_table.column('Date Added', minwidth=150)
+    passwords_table.column('Date Modified', minwidth=150)
 
     passwords_table.heading('#0', text='')
     passwords_table.heading('Platform', text='Platform')
@@ -104,6 +139,7 @@ try:
     passwords_table.heading('Password', text='Password')
     passwords_table.heading('Date Added', text='Date Added')
     passwords_table.heading('Date Modified', text='Date Modified')
+
     passwords_table.bind('<ButtonRelease-1>', get_selected)
     passwords_table.grid(row=0, column=0)
 
@@ -118,6 +154,7 @@ try:
 
     update_table()
 
+    main.config(menu=menuBar)
     main.mainloop()
 except KeyError:
     pass
