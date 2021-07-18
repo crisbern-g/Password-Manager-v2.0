@@ -1,4 +1,5 @@
-from os import stat
+from cryptography.fernet import Fernet
+from decouple import config
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
@@ -17,12 +18,19 @@ def add_account():
     addAccount.mainloop()
 
 def update_table():
+    secret_key = config('SECRET').encode('UTF-8')
+    encrpytor_decryptor = Fernet(secret_key)
+
     deleteButton.config(state='disabled')
     editButton.config(state='disabled')
     accounts = dataBase_Connection.get_all_accounts(login_credentials['id'])
     passwords_table.delete(*passwords_table.get_children())
+
     for account in accounts:
-        passwords_table.insert(parent='', index='end', iid=account[0], text='', values=(account[1], account[2], account[3], account[4], account[5]))
+        decrypted_password = encrpytor_decryptor.decrypt(account[3].encode('UTF-8'))
+        decrypted_password = decrypted_password.decode('UTF-8')
+
+        passwords_table.insert(parent='', index='end', iid=account[0], text='', values=(account[1], account[2], decrypted_password, account[4], account[5]))
 
 def get_selected(*event):
     selected = passwords_table.focus()
@@ -50,19 +58,40 @@ def edit_account():
     data = get_selected()
     edit = Edit_Info.Edit_Info(main, dataBase_Connection, login_credentials['id'], update_table, data['data'][0], data['data'][1], data['data'][2], data['id'])
     edit.mainloop()
-    
+
+def search():
+    secret_key = config('SECRET').encode('UTF-8')
+    encrpytor_decryptor = Fernet(secret_key)
+
+    accounts = dataBase_Connection.search_account(login_credentials['id'], searchEntry.get())
+    passwords_table.delete(*passwords_table.get_children())
+
+    for account in accounts:
+        decrypted_password = encrpytor_decryptor.decrypt(account[3].encode('UTF-8'))
+        decrypted_password = decrypted_password.decode('UTF-8')
+        passwords_table.insert(parent='', index='end', iid=account[0], text='', values=(account[1], account[2], decrypted_password, account[4], account[5]))
 
 try:
     main = tk.Tk()
     main.title('Password Manager 2.0')
+    main.resizable(0,0)
 
     tk.Label(main, text='Logged in As '+ login_credentials['username']).grid(row=0, column=0, sticky=tk.W)
 
+    searchPane = tk.PanedWindow(main, height=900)
+    searchPane.grid(row=1, column=0)
+
+    searchButton = tk.Button(searchPane,text='Search', width=20, command=search)
+    searchButton.grid(row=0, column=0, sticky=tk.W, padx=20)
+
+    searchEntry = tk.Entry(searchPane, width=50)
+    searchEntry.grid(row=0, column=1, sticky=tk.W)
+
     passsword_table_pane = tk.PanedWindow(main)
-    passsword_table_pane.grid(row=1, column=0)
+    passsword_table_pane.grid(row=2, column=0)
 
     actions_button_pane = tk.PanedWindow(main)
-    actions_button_pane.grid(row=1, column=1)
+    actions_button_pane.grid(row=2, column=1)
 
     passwords_table = ttk.Treeview(passsword_table_pane, selectmode='browse')
     passwords_table['columns'] = ('Platform', 'Username', 'Password', 'Date Added', 'Date Modified')
