@@ -1,6 +1,10 @@
+'''
+THE CONNECTION TO THE DATABASE WILL ALL BE HANDLED HERE. THIS WILL BE IMPORTED IN THE main AND WILL BE PASS THROUGH
+AS AN ARGUMENT
+'''
 import sqlite3
 import os
-from cryptography.fernet import Fernet
+from cryptography.fernet import Fernet, InvalidToken
 from decouple import config
 
 class DbConnection:
@@ -11,13 +15,15 @@ class DbConnection:
                 secret_key = Fernet.generate_key()
                 file.writelines('SECRET=' + secret_key.decode('UTF-8'))
             
-        #gets they KEY and converts it into BYTES
+        #gets they KEY and converts it into BYTES also initialization of the enryption class
         self.secret_key = config('SECRET').encode('UTF-8')
         self.encrpytor_decryptor = Fernet(self.secret_key)
 
+        #creating the Passwords.db if it does not exits
         with sqlite3.connect('Passwords.db') as self.connection:
             self.dbCUrsor = self.connection.cursor()
 
+            #creating  the ueers table if it does not exist yet
             self.dbCUrsor.execute('''
                 CREATE TABLE IF NOT EXISTS users(
                     id integer PRIMARY KEY,
@@ -26,6 +32,8 @@ class DbConnection:
                 )
             ''')
             
+            #creating  the accounts table if it does not exist yet
+            #the accounts table is where the "passwords" will be stored
             self.dbCUrsor.execute('''
                 CREATE TABLE IF NOT EXISTS accounts(
                     id integer PRIMARY KEY,
@@ -39,9 +47,12 @@ class DbConnection:
                 )
             ''')
     
+    #adds one user
     def addUser(self, username, password):
         with self.connection:
+            #turns the password into bytes and encrypt it, returning a hashed byte
             password = self.encrpytor_decryptor.encrypt(password.encode('UTF-8'))
+            #converts the byte into string before storing to the database
             password = password.decode('UTF-8')
 
             self.dbCUrsor.execute('INSERT INTO users(username, password) VALUES(:username, :password)', {'username':username, 'password':password})
@@ -60,6 +71,8 @@ class DbConnection:
                 else:
                     return None
             except TypeError:
+                return None
+            except InvalidToken:
                 return None
     
     def add_account(self, platform, username, password, date_added, date_modified, user_id):

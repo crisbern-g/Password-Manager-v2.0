@@ -84,7 +84,7 @@ class Manage_Account(tk.Toplevel):
             
             if choice:
                 self.db_connection.delete_user(self.user_id)
-                messagebox.showinfo(message='All data associated to your account have been deleted. The program will now terminate')
+                messagebox.showinfo(title='Notice',message='All data associated to your account have been deleted. The program will now terminate')
                 self.master.destroy()                         
         else:
             messagebox.showerror(title='Error',message='Wrong Password')

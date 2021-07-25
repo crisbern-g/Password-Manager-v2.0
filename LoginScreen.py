@@ -40,12 +40,12 @@ class Login_Signup(Tk):
         self.passEntry.bind('<KeyRelease>',self.validate)
 
         #Buttons
-        self.showPasswordBtn = Button(self,text="Show Password",width="15",font="Roboto 8",command=self.show_hide_password,bg="Azure")
+        self.showPasswordBtn = Button(self,text="Show Password",width="15",font="Roboto 8",command=self.show_hide_password,bg="Azure", cursor='hand2')
         self.showPasswordBtn.grid(row=3,column=1,padx=75,pady=10)
-        self.loginBtn = Button(self,text='Login',height="1",width="10",font="Roboto 9",state=DISABLED,command= self.login,bg='Azure')
+        self.loginBtn = Button(self,text='Login',height="1",width="10",font="Roboto 9",state=DISABLED,command= self.login,bg='Azure',cursor='hand2')
         self.loginBtn.grid(row=4,column=1,sticky=W,pady=10)
 
-        self.signUpBtn = Button(self,text='Sign Up',height="1",width="10",font="Roboto 9",command=self.register,bg="Azure")
+        self.signUpBtn = Button(self,text='Sign Up',height="1",width="10",font="Roboto 9",command=self.register,bg="Azure", cursor='hand2')
         self.signUpBtn.grid(row=5,column=1,sticky=W,pady=5)
 
         Label(self, text = "PM", font="GIGI 13",bg="LightSteelBlue").place(x=260, y=150)
@@ -91,7 +91,6 @@ class Login_Signup(Tk):
             self.loginBtn['state']=DISABLED
 
     def register(self):
-        visible_password = False
         def registerBtn():
             registerAccount = {
                 'NewUsername' : newUsername.get(),
@@ -177,10 +176,10 @@ class Login_Signup(Tk):
 
         Label(registerScreen, text="",bg="LightSteelBlue").pack()
 
-        hideRegBtn = Button(registerScreen, text="Show password",height="1",width="15",font="Roboto 7 bold",command=show_hide_register_password)
+        hideRegBtn = Button(registerScreen, text="Show password",height="1",width="15",font="Roboto 7 bold",command=show_hide_register_password,cursor='hand2')
         hideRegBtn.pack()
 
-        registerBtn = Button(registerScreen, text="Register", height="1", width="10", font="Roboto 9 bold", state=DISABLED,command=registerBtn)
+        registerBtn = Button(registerScreen, text="Register", height="1", width="10", font="Roboto 9 bold", state=DISABLED,command=registerBtn,cursor='hand2')
         registerBtn.pack()
         self.withdraw()
         registerScreen.protocol("WM_DELETE_WINDOW",on_closing)
