@@ -8,6 +8,7 @@ class Edit_Info(Account_Input.Add_Account):
         self.action = action
         self.account_id = account_id
         self.submitButton.config(state='normal')
+        self.title("Edit Account")
     
     def get_values(self):
         ts = datetime.datetime.now()
